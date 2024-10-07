@@ -1,6 +1,6 @@
 from langchain.memory import ConversationBufferMemory
 
-memory = ConversationBufferMemory()
+memory = ConversationBufferMemory(memory_key='chat_history')
 
 def save_facts_to_memory(facts):
     for fact in facts:

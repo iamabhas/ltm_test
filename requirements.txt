@@ -6,3 +6,7 @@ sentence-transformers
 scikit-learn
 matplotlib
 numpy
+langchain-community
+langchain_groq
+python-dotenv
+langchain-core
