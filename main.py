@@ -152,13 +152,8 @@ iterations = 2
 # print()
 
 for test in test_cases:
-    print("before- withour clearing the memory is",memory)
-    print()
-    print()
-    print()
-    print()
-    print()
-    
+    print("<><><><><><><>WITHOUT MEMORY RUN<><><><><><><><><><>")   
+    print() 
     # memory.save_context({"user": test["question"]}, {"response": ""})
     response_no_memory_ai = query_llm(query=test["question"], set_memory='unset')
     # response_no_memory = response_no_memory_ai
@@ -175,9 +170,10 @@ for test in test_cases:
     })
     print()
     print()
-    clear_memory()
-    print("After clearing the memory, the memory is", memory)
+    print("<><><><><><><>WITH MEMORY RUN<><><><><><><><><><>")   
     print()
+    print()
+
     response_with_memory_ai = query_llm(test["question"], set_memory='set')
     # response_with_memory = response_no_memory_ai.content
     is_accurate_with_memory, similarity_with_memory = check_accuracy_semantic(response_with_memory_ai, test["expected"])
