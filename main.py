@@ -160,7 +160,7 @@ for test in test_cases:
     print()
     
     # memory.save_context({"user": test["question"]}, {"response": ""})
-    response_no_memory_ai = query_llm(query=test["question"], memory=memory)
+    response_no_memory_ai = query_llm(query=test["question"], set_memory='unset')
     # response_no_memory = response_no_memory_ai
     is_accurate_no_memory, similarity_no_memory = check_accuracy_semantic(response_no_memory_ai, test["expected"])
 
@@ -178,7 +178,7 @@ for test in test_cases:
     clear_memory()
     print("After clearing the memory, the memory is", memory)
     print()
-    response_with_memory_ai = query_llm(test["question"], memory=memory)
+    response_with_memory_ai = query_llm(test["question"], set_memory='set')
     # response_with_memory = response_no_memory_ai.content
     is_accurate_with_memory, similarity_with_memory = check_accuracy_semantic(response_with_memory_ai, test["expected"])
 

@@ -22,6 +22,7 @@
 #             print(f"Error calling Gemini API: {e}")
 #             return None
 
+from langchain.memory import ConversationBufferMemory
 
 """First install these things before running this file:
 1. langchain_groq
@@ -29,6 +30,13 @@
 
 
 """
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    MessagesPlaceholder,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+
 from langchain_groq import ChatGroq
 
 import os
@@ -37,7 +45,7 @@ from dotenv import load_dotenv
 from langchain.chains import LLMChain
 load_dotenv()
 
-
+from tests.llm_test_cases import test_cases
 api_key = os.getenv("GROQ_API")
 def get_groq_llm(model_name:str="mixtral-8x7b-32768"):
     
@@ -49,35 +57,53 @@ def get_groq_llm(model_name:str="mixtral-8x7b-32768"):
                           max_retries=2,)
     return llm
 
-def query_llm(query:str, memory):
-    # if memory ==[]:
-    #     messages = [
-    #             ("system", "You are a helpful assistant. Answer the user query provided to you."),
-    #             ("human", query),
-    #         ]
-    # else:
-    #      messages = [
-    #             ("system", f"You are a helpful assistant. Answer the user query provided to you based on the memory.\n\n The memory is:{memory}"),
-    #             ("human", query),
-    #      ]
-    template = """You are a nice chatbot having a conversation with a human.
-                Previous conversation:
-                {chat_history}
-                New human question: {question}
-                Response:"""
+def query_llm(query:str, set_memory = ['set', 'unset']):
+    """
+    set_memory = ['set', 'unset']
+    set: when we want to put messages to memory variable.
+    unset: When we want the memory to be empty and llm to use its own memory 
     
-    
-    prompt = PromptTemplate.from_template(template)
-
+    """
     llm = get_groq_llm()
+
+    prompt = ChatPromptTemplate(
+    messages=[
+        SystemMessagePromptTemplate.from_template(
+            "You are a nice chatbot having a conversation with a human."
+        ),
+        # The `variable_name` here is what must align with memory
+        MessagesPlaceholder(variable_name="chat_history"),
+        HumanMessagePromptTemplate.from_template("{question}")
+    ]
+    )
+    
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    for i in test_cases:
+        question = i['question']
+        response = i['expected']    
+        memory.save_context({"user": question}, {"response": response} )
+    
     conversation = LLMChain(
         llm=llm,
         prompt=prompt,
         verbose=True,
         memory=memory
     )
-    response = conversation({"question":query})
 
+    if set_memory == 'set':
+        response = conversation.invoke({"question":query})
+        return response['text']
+       
+    elif set_memory == 'unset':
+        memory.clear()
+        response = conversation.invoke({"question":query})
+        return response['text']
+        
+    else:
+        return f"The available values for set_memory are only 'set' and 'unset'. But you provided {set_memory} which is invalid."
+
+    
+    # return response
 
     # response = llm.invoke(messages)
     return response['text']
