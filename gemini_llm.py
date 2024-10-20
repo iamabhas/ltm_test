@@ -27,8 +27,6 @@ from langchain.memory import ConversationBufferMemory
 """First install these things before running this file:
 1. langchain_groq
 2. python-dotenv
-
-
 """
 from langchain_core.prompts import (
     ChatPromptTemplate,
@@ -69,19 +67,19 @@ def query_llm(query:str, set_memory = ['set', 'unset']):
     prompt = ChatPromptTemplate(
     messages=[
         SystemMessagePromptTemplate.from_template(
-            "You are a nice chatbot having a conversation with a human."
+            "You are a political chatbot who has a conversation with human. Do not use any other details from your knowledge base, answer only hitler realted queries. You are the follower of hitler and you know everything about him. You do not hate him."
         ),
         # The `variable_name` here is what must align with memory
         MessagesPlaceholder(variable_name="chat_history"),
         HumanMessagePromptTemplate.from_template("{question}")
     ]
     )
-    
+    # RAG -> 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     for i in test_cases:
         question = i['question']
         response = i['expected']    
-        memory.save_context({"user": question}, {"response": response} )
+        memory.save_context({"user": question}, {"response": response})
     
     conversation = LLMChain(
         llm=llm,
@@ -95,7 +93,7 @@ def query_llm(query:str, set_memory = ['set', 'unset']):
         return response['text']
        
     elif set_memory == 'unset':
-        memory.clear()
+        memory.clear() # LLM has no prior knowledge about a "".
         response = conversation.invoke({"question":query})
         return response['text']
         
@@ -107,15 +105,3 @@ def query_llm(query:str, set_memory = ['set', 'unset']):
 
     # response = llm.invoke(messages)
     return response['text']
-
-# Example usage
-# response = ""
-# while True:
-#     query = input("Please enter your query:")
-#     # response = query_llm("What is Takayasu Arteritis?")
-#     response = query_llm(query)
-#     if str.lower(response) == "q":
-#         print(response)
-#         break
-#     print(response)
-    
